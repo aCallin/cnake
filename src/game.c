@@ -1,11 +1,12 @@
 #include "game.h"
 
-#include <SDL.h>
+#include "SDL.h"
+#include "game_scene_common.h"
 
 #define WINDOW_TITLE "cnake"
 #define WINDOW_POS SDL_WINDOWPOS_CENTERED
-#define WINDOW_WIDTH 600
-#define WINDOW_HEIGHT 700
+#define INTERNAL_WIDTH 600
+#define INTERNAL_HEIGHT 700
 
 #define UPDATES_PER_SECOND 60
 #define UPDATE_RATE (1000.0f / UPDATES_PER_SECOND)
@@ -20,7 +21,7 @@ int run_game() {
     }
 
     // Create window and renderer
-    SDL_Window *const window = SDL_CreateWindow(WINDOW_TITLE, WINDOW_POS, WINDOW_POS, WINDOW_WIDTH, WINDOW_HEIGHT, 0);
+    SDL_Window *const window = SDL_CreateWindow(WINDOW_TITLE, WINDOW_POS, WINDOW_POS, INTERNAL_WIDTH, INTERNAL_HEIGHT, 0);
     if (window == NULL) {
         LOG_ERROR
         SDL_QuitSubSystem(SDL_INIT_VIDEO);
@@ -33,6 +34,18 @@ int run_game() {
         SDL_QuitSubSystem(SDL_INIT_VIDEO);
         return 1;
     }
+
+    // Initialize game container and load in the first scene
+    struct game_container game_container;
+    game_container.window = window;
+    game_container.renderer = renderer;
+    game_container.internal_width = INTERNAL_WIDTH;
+    game_container.internal_height = INTERNAL_HEIGHT;
+    game_container.scene.load = load_test_scene;
+    game_container.scene.update = update_test_scene;
+    game_container.scene.draw = draw_test_scene;
+    game_container.scene.unload = unload_test_scene;
+    game_container.scene.load(&game_container);
 
     // Do the game loop
     SDL_bool running = SDL_TRUE;
@@ -55,6 +68,7 @@ int run_game() {
         elapsed_time += current_time - previous_time;
         previous_time = current_time;
         while (elapsed_time >= UPDATE_RATE) {
+            game_container.scene.update(&game_container);
             elapsed_time -= UPDATE_RATE;
         }
 
@@ -63,10 +77,12 @@ int run_game() {
             LOG_ERROR
         if (SDL_RenderClear(renderer) < 0)
             LOG_ERROR
+        game_container.scene.draw(&game_container);
         SDL_RenderPresent(renderer);
     }
 
     // Clean up
+    game_container.scene.unload(&game_container);
     SDL_DestroyRenderer(renderer);
     SDL_DestroyWindow(window);
     SDL_QuitSubSystem(SDL_INIT_VIDEO);
