@@ -1,7 +1,5 @@
-#include <stdio.h>
-#include <SDL.h>
+#include "game.h"
 
-int main(int argc, char *argv[]) {
-    printf("Hello, world!\n");
-    return 0;
+int main(const int argc, const char *const argv[]) {
+    return run_game();
 }
