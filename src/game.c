@@ -13,18 +13,24 @@
 #define LOG_ERROR SDL_LogError(SDL_LOG_CATEGORY_APPLICATION, "run_game(): %s", SDL_GetError());
 
 int run_game() {
-    // Create window
-    SDL_Window *const window = SDL_CreateWindow(WINDOW_TITLE, WINDOW_POS, WINDOW_POS, WINDOW_WIDTH, WINDOW_HEIGHT, 0);
-    if (window == NULL) {
+    // Initialize video
+    if (SDL_InitSubSystem(SDL_INIT_VIDEO) < 0) {
         LOG_ERROR
         return 1;
     }
 
-    // Create renderer
+    // Create window and renderer
+    SDL_Window *const window = SDL_CreateWindow(WINDOW_TITLE, WINDOW_POS, WINDOW_POS, WINDOW_WIDTH, WINDOW_HEIGHT, 0);
+    if (window == NULL) {
+        LOG_ERROR
+        SDL_QuitSubSystem(SDL_INIT_VIDEO);
+        return 1;
+    }
     SDL_Renderer *const renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC);
     if (renderer == NULL) {
-        SDL_DestroyWindow(window);
         LOG_ERROR
+        SDL_DestroyWindow(window);
+        SDL_QuitSubSystem(SDL_INIT_VIDEO);
         return 1;
     }
 
@@ -63,6 +69,8 @@ int run_game() {
     // Clean up
     SDL_DestroyRenderer(renderer);
     SDL_DestroyWindow(window);
+    SDL_QuitSubSystem(SDL_INIT_VIDEO);
+    SDL_Quit();
 
     return 0;
 }
