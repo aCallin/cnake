@@ -41,10 +41,14 @@ int run_game() {
     game_container.renderer = renderer;
     game_container.internal_width = INTERNAL_WIDTH;
     game_container.internal_height = INTERNAL_HEIGHT;
-    game_container.scene.load = load_test_scene;
-    game_container.scene.update = update_test_scene;
-    game_container.scene.draw = draw_test_scene;
-    game_container.scene.unload = unload_test_scene;
+    // game_container.scene.load = load_test_scene;
+    // game_container.scene.update = update_test_scene;
+    // game_container.scene.draw = draw_test_scene;
+    // game_container.scene.unload = unload_test_scene;
+    game_container.scene.load = load_play_scene;
+    game_container.scene.update = update_play_scene;
+    game_container.scene.draw = draw_play_scene;
+    game_container.scene.unload = unload_play_scene;
     game_container.scene.load(&game_container);
 
     // Do the game loop

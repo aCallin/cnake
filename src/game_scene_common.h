@@ -33,4 +33,9 @@ void update_test_scene(struct game_container *gc);
 void draw_test_scene(struct game_container *gc);
 void unload_test_scene(struct game_container *gc);
 
+void load_play_scene(struct game_container *gc);
+void update_play_scene(struct game_container *gc);
+void draw_play_scene(struct game_container *gc);
+void unload_play_scene(struct game_container *gc);
+
 #endif
