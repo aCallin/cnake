@@ -1,6 +1,7 @@
 #include "game.h"
 
 #include "SDL.h"
+#include "SDL_image.h"
 #include "game_scene_common.h"
 
 #define WINDOW_TITLE "cnake"
@@ -11,26 +12,34 @@
 #define UPDATES_PER_SECOND 60
 #define UPDATE_RATE (1000.0f / UPDATES_PER_SECOND)
 
-#define LOG_ERROR SDL_LogError(SDL_LOG_CATEGORY_APPLICATION, "run_game(): %s", SDL_GetError());
+#define LOG_SDL_ERROR SDL_LogError(SDL_LOG_CATEGORY_APPLICATION, "run_game(): %s", SDL_GetError());
+#define LOG_IMG_ERROR SDL_LogError(SDL_LOG_CATEGORY_APPLICATION, "run_game(): %s", IMG_GetError());
 
 int run_game() {
-    // Initialize video
+    // Initialize video and image
     if (SDL_InitSubSystem(SDL_INIT_VIDEO) < 0) {
-        LOG_ERROR
+        LOG_SDL_ERROR
+        return 1;
+    }
+    if (IMG_Init(IMG_INIT_PNG) == 0) {
+        SDL_QuitSubSystem(SDL_INIT_VIDEO);
+        LOG_IMG_ERROR
         return 1;
     }
 
     // Create window and renderer
     SDL_Window *const window = SDL_CreateWindow(WINDOW_TITLE, WINDOW_POS, WINDOW_POS, INTERNAL_WIDTH, INTERNAL_HEIGHT, 0);
     if (window == NULL) {
-        LOG_ERROR
+        LOG_SDL_ERROR
+        IMG_Quit();
         SDL_QuitSubSystem(SDL_INIT_VIDEO);
         return 1;
     }
     SDL_Renderer *const renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC);
     if (renderer == NULL) {
-        LOG_ERROR
+        LOG_SDL_ERROR
         SDL_DestroyWindow(window);
+        IMG_Quit();
         SDL_QuitSubSystem(SDL_INIT_VIDEO);
         return 1;
     }
@@ -41,10 +50,6 @@ int run_game() {
     game_container.renderer = renderer;
     game_container.internal_width = INTERNAL_WIDTH;
     game_container.internal_height = INTERNAL_HEIGHT;
-    // game_container.scene.load = load_test_scene;
-    // game_container.scene.update = update_test_scene;
-    // game_container.scene.draw = draw_test_scene;
-    // game_container.scene.unload = unload_test_scene;
     game_container.scene.load = load_play_scene;
     game_container.scene.update = update_play_scene;
     game_container.scene.draw = draw_play_scene;
@@ -78,9 +83,9 @@ int run_game() {
 
         // Draw
         if (SDL_SetRenderDrawColor(renderer, 0, 0, 0, SDL_ALPHA_OPAQUE) < 0)
-            LOG_ERROR
+            LOG_SDL_ERROR
         if (SDL_RenderClear(renderer) < 0)
-            LOG_ERROR
+            LOG_SDL_ERROR
         game_container.scene.draw(&game_container);
         SDL_RenderPresent(renderer);
     }
@@ -89,6 +94,7 @@ int run_game() {
     game_container.scene.unload(&game_container);
     SDL_DestroyRenderer(renderer);
     SDL_DestroyWindow(window);
+    IMG_Quit();
     SDL_QuitSubSystem(SDL_INIT_VIDEO);
     SDL_Quit();
 
