@@ -2,6 +2,7 @@
 #define GAME_SCENE_COMMON_H
 
 #include "SDL.h"
+#include "resources.h"
 
 struct game_container;
 
@@ -18,6 +19,7 @@ struct game_container {
     SDL_Renderer *renderer;
     int internal_width;
     int internal_height;
+    resources resources;
     struct scene scene;
 };
 

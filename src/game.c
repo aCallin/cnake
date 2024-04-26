@@ -50,6 +50,15 @@ int run_game() {
     game_container.renderer = renderer;
     game_container.internal_width = INTERNAL_WIDTH;
     game_container.internal_height = INTERNAL_HEIGHT;
+    game_container.resources = create_resources();
+    if (game_container.resources == NULL) {
+        SDL_LogError(SDL_LOG_CATEGORY_APPLICATION, "run_game(): unable to create resources");
+        SDL_DestroyRenderer(renderer);
+        SDL_DestroyWindow(window);
+        IMG_Quit();
+        SDL_QuitSubSystem(SDL_INIT_VIDEO);
+        return 1;
+    }
     game_container.scene.load = load_play_scene;
     game_container.scene.update = update_play_scene;
     game_container.scene.draw = draw_play_scene;
@@ -92,6 +101,7 @@ int run_game() {
 
     // Clean up
     game_container.scene.unload(&game_container);
+    destroy_resources(game_container.resources);
     SDL_DestroyRenderer(renderer);
     SDL_DestroyWindow(window);
     IMG_Quit();
