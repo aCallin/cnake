@@ -66,6 +66,13 @@ resources create_resources() {
 
     // Resource entries
     resources->resource_entries = malloc(INITIAL_CAPACITY * sizeof(struct resource_entry));
+    if (resources->resource_entries == NULL) {
+        SDL_LogError(SDL_LOG_CATEGORY_APPLICATION, "create_resource(): resource_entries malloc returned NULL");
+        free(resources->resources_path);
+        SDL_free(exe_path);
+        free(resources);
+        return NULL;
+    }
     resources->resource_entries_capacity = INITIAL_CAPACITY;
     resources->resource_entries_size = 0;
 
