@@ -128,8 +128,9 @@ int load_resource(resources const resources, SDL_Renderer *const renderer, const
             invalid_type = SDL_TRUE;
             break;
     }
-    if (invalid_type) {
-        SDL_LogError(SDL_LOG_CATEGORY_APPLICATION, "load_resource(): invalid type");
+    if (entry->data == NULL || invalid_type) {
+        (entry->data == NULL) ? SDL_LogError(SDL_LOG_CATEGORY_APPLICATION, "load_resource(): IMG_LoadTexture returned NULL") : 
+            SDL_LogError(SDL_LOG_CATEGORY_APPLICATION, "load_resource(): invalid type");
         free(entry->tag);
         free(load_path);
         return 0;
