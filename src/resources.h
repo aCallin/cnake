@@ -3,6 +3,10 @@
 
 #include "SDL.h"
 
+/*
+ * To do: shrink entries when small enough
+*/
+
 typedef struct resources *resources;
 enum resource_type { resource_type_texture };
 

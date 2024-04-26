@@ -5,7 +5,7 @@
 
 #define RESOURCES_FOLDER_NAME "res/"
 
-#define INITIAL_CAPACITY 2
+#define INITIAL_CAPACITY 5
 #define GROWTH_FACTOR 1.5
 
 struct resource_entry {

@@ -6,6 +6,7 @@
 
 struct data {
     int tile_dimension;
+    struct not_snake not_snake;
 };
 
 void load_play_scene(struct game_container *gc) {
@@ -15,6 +16,7 @@ void load_play_scene(struct game_container *gc) {
     struct data *const pd = (struct data *)gc->scene.data;
 
     pd->tile_dimension = gc->internal_width / TILE_SIZE;
+    load_not_snake(&pd->not_snake, gc->resources, gc->renderer, TILE_SIZE, pd->tile_dimension);
 
     SDL_Log("Load play scene done");
 }
@@ -26,12 +28,15 @@ void update_play_scene(struct game_container *gc) {
 void draw_play_scene(struct game_container *gc) {
     struct data *const pd = (struct data *)gc->scene.data;
 
-    draw_tiles(gc->renderer, TILE_SIZE, pd->tile_dimension);
+    draw_not_snake(&pd->not_snake, gc->renderer, TILE_SIZE, pd->tile_dimension);
 }
 
 void unload_play_scene(struct game_container *gc) {
     SDL_Log("Start unload play scene");
 
+    struct data *const pd = (struct data *)gc->scene.data;
+
+    unload_not_snake(&pd->not_snake, gc->resources);
     free(gc->scene.data);
 
     SDL_Log("Unload play scene done");
