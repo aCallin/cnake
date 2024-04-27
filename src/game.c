@@ -2,6 +2,7 @@
 
 #include "SDL.h"
 #include "SDL_image.h"
+#include "SDL_ttf.h"
 #include "game_scene_common.h"
 
 #define WINDOW_TITLE "cnake"
@@ -14,16 +15,26 @@
 
 #define LOG_SDL_ERROR SDL_LogError(SDL_LOG_CATEGORY_APPLICATION, "run_game(): %s", SDL_GetError());
 #define LOG_IMG_ERROR SDL_LogError(SDL_LOG_CATEGORY_APPLICATION, "run_game(): %s", IMG_GetError());
+#define LOG_TTF_ERROR SDL_LogError(SDL_LOG_CATEGORY_APPLICATION, "run_game(): %s", TTF_GetError());
 
 int run_game() {
-    // Initialize video and image
+    // Initialize video, image, font
     if (SDL_InitSubSystem(SDL_INIT_VIDEO) < 0) {
         LOG_SDL_ERROR
+        SDL_Quit();
         return 1;
     }
     if (IMG_Init(IMG_INIT_PNG) == 0) {
-        SDL_QuitSubSystem(SDL_INIT_VIDEO);
         LOG_IMG_ERROR
+        SDL_QuitSubSystem(SDL_INIT_VIDEO);
+        SDL_Quit();
+        return 1;
+    }
+    if (TTF_Init() == -1) {
+        LOG_TTF_ERROR
+        IMG_Quit();
+        SDL_QuitSubSystem(SDL_INIT_VIDEO);
+        SDL_Quit();
         return 1;
     }
 
@@ -31,16 +42,20 @@ int run_game() {
     SDL_Window *const window = SDL_CreateWindow(WINDOW_TITLE, WINDOW_POS, WINDOW_POS, INTERNAL_WIDTH, INTERNAL_HEIGHT, 0);
     if (window == NULL) {
         LOG_SDL_ERROR
+        TTF_Quit();
         IMG_Quit();
         SDL_QuitSubSystem(SDL_INIT_VIDEO);
+        SDL_Quit();
         return 1;
     }
     SDL_Renderer *const renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC);
     if (renderer == NULL) {
         LOG_SDL_ERROR
         SDL_DestroyWindow(window);
+        TTF_Quit();
         IMG_Quit();
         SDL_QuitSubSystem(SDL_INIT_VIDEO);
+        SDL_Quit();
         return 1;
     }
 
@@ -55,8 +70,10 @@ int run_game() {
         SDL_LogError(SDL_LOG_CATEGORY_APPLICATION, "run_game(): unable to create resources");
         SDL_DestroyRenderer(renderer);
         SDL_DestroyWindow(window);
+        TTF_Quit();
         IMG_Quit();
         SDL_QuitSubSystem(SDL_INIT_VIDEO);
+        SDL_Quit();
         return 1;
     }
     game_container.scene.load = load_play_scene;
@@ -104,6 +121,7 @@ int run_game() {
     destroy_resources(game_container.resources);
     SDL_DestroyRenderer(renderer);
     SDL_DestroyWindow(window);
+    TTF_Quit();
     IMG_Quit();
     SDL_QuitSubSystem(SDL_INIT_VIDEO);
     SDL_Quit();
