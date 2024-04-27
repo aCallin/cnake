@@ -2,7 +2,7 @@
 
 #define MOVE_FRAMES 20
 
-void load_snake(struct snake *const s, resources const resources, SDL_Renderer *const renderer, const int tile_dimension) {
+void snake_load(struct snake *const s, resources const resources, SDL_Renderer *const renderer, const int tile_dimension) {
     s->body_tiles = malloc(tile_dimension * tile_dimension * sizeof(SDL_Point));
     if (s->body_tiles == NULL) {
         SDL_LogError(SDL_LOG_CATEGORY_APPLICATION, "load_snake(): malloc body_tiles returned NULL");
@@ -25,7 +25,7 @@ void load_snake(struct snake *const s, resources const resources, SDL_Renderer *
     s->elapsed_move_frames = MOVE_FRAMES;
 }
 
-void update_snake(struct snake *s) {
+void snake_update(struct snake *s) {
     // Don't start moving until D is pressed for the first time
     if (!s->started_moving && s->keyboard_state[SDL_SCANCODE_D])
         s->started_moving = SDL_TRUE;
@@ -64,7 +64,7 @@ void update_snake(struct snake *s) {
     }
 }
 
-void draw_snake(struct snake *s, SDL_Renderer *const renderer, const int tile_size) {
+void snake_draw(struct snake *s, SDL_Renderer *const renderer, const int tile_size) {
     for (int i = 0; i < s->body_tiles_length; i++) {
         SDL_SetRenderDrawColor(renderer, 128, 93, 228, SDL_ALPHA_OPAQUE);
         SDL_Rect body_rect = {s->body_tiles[i].x * tile_size, s->body_tiles[i].y * tile_size, tile_size, tile_size};
@@ -72,6 +72,6 @@ void draw_snake(struct snake *s, SDL_Renderer *const renderer, const int tile_si
     }
 }
 
-void unload_snake(struct snake *s, resources resources) {
+void snake_unload(struct snake *s, resources resources) {
     free(s->body_tiles);
 }
