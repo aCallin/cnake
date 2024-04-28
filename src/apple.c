@@ -1,8 +1,8 @@
 #include "apple.h"
 
 void apple_load(struct apple *const apple, resources const resources, SDL_Renderer *const renderer, const int tile_dimension) {
-    load_resource(resources, renderer, "apple.png", resource_type_texture, "apple");
-    apple->texture = get_resource(resources, "apple");
+    resources_load_texture(resources, renderer, "apple.png", "apple");
+    apple->texture = resources_get(resources, "apple");
     SDL_QueryTexture(apple->texture, NULL, NULL, &apple->texture_size.x, &apple->texture_size.y);
     apple->tile.x = tile_dimension - 4;
     apple->tile.y = tile_dimension / 2;
@@ -14,7 +14,7 @@ void apple_draw(const struct apple *const apple, SDL_Renderer *const renderer, c
 }
 
 void apple_unload(const struct apple *const apple, resources const resources) {
-    unload_resource(resources, "apple");
+    resources_unload(resources, "apple");
 }
 
 SDL_Point apple_get_tile(const struct apple *const apple) {

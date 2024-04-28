@@ -65,7 +65,7 @@ int run_game() {
     game_container.renderer = renderer;
     game_container.internal_width = INTERNAL_WIDTH;
     game_container.internal_height = INTERNAL_HEIGHT;
-    game_container.resources = create_resources();
+    game_container.resources = resources_create();
     if (game_container.resources == NULL) {
         SDL_LogError(SDL_LOG_CATEGORY_APPLICATION, "run_game(): unable to create resources");
         SDL_DestroyRenderer(renderer);
@@ -118,7 +118,7 @@ int run_game() {
 
     // Clean up
     game_container.scene.unload(&game_container);
-    destroy_resources(game_container.resources);
+    resources_destroy(game_container.resources);
     SDL_DestroyRenderer(renderer);
     SDL_DestroyWindow(window);
     TTF_Quit();
