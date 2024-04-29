@@ -31,7 +31,8 @@ void load_play_scene(struct game_container *gc) {
 
 void update_play_scene(struct game_container *gc) {
     struct data *const pd = (struct data *)gc->scene.data;
-    snake_update(&pd->snake);
+    if (!snake_collided(&pd->snake))
+        snake_update(&pd->snake, pd->tile_dimension);
 }
 
 void draw_play_scene(struct game_container *gc) {

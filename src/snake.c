@@ -23,9 +23,10 @@ void snake_load(struct snake *const s, resources const resources, SDL_Renderer *
     s->last_move_direction.y = 2;
     s->started_moving = SDL_FALSE;
     s->elapsed_move_frames = MOVE_FRAMES;
+    s->collided = SDL_FALSE;
 }
 
-void snake_update(struct snake *s) {
+void snake_update(struct snake *s, const int tile_dimension) {
     // Don't start moving until D is pressed for the first time
     if (!s->started_moving && s->keyboard_state[SDL_SCANCODE_D])
         s->started_moving = SDL_TRUE;
@@ -60,6 +61,14 @@ void snake_update(struct snake *s) {
             s->body_tiles[0].y += s->move_direction.y;
             s->last_move_direction = s->move_direction;
             s->elapsed_move_frames = 0;
+
+            // Check collision after movement
+            if (s->body_tiles[0].x < 0 || s->body_tiles[0].x >= tile_dimension || s->body_tiles[0].y < 0 || s->body_tiles[0].y >= tile_dimension)
+                s->collided = SDL_TRUE;
+            for (int i = 1; i < s->body_tiles_length; i++) {
+                if (s->body_tiles[0].x == s->body_tiles[i].x && s->body_tiles[0].y == s->body_tiles[i].y)
+                    s->collided = SDL_TRUE;
+            }
         }
     }
 }
@@ -74,4 +83,8 @@ void snake_draw(struct snake *s, SDL_Renderer *const renderer, const int tile_si
 
 void snake_unload(struct snake *s, resources resources) {
     free(s->body_tiles);
+}
+
+SDL_bool snake_collided(struct snake *s) {
+    return s->collided;
 }
