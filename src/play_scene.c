@@ -15,6 +15,11 @@ struct data {
     struct apple apple;
 };
 
+static SDL_Point generate_next_apple_tile() {
+    SDL_Point tile = {0, 0};
+    return tile;
+}
+
 void load_play_scene(struct game_container *gc) {
     SDL_Log("Start load play scene");
 
@@ -31,8 +36,19 @@ void load_play_scene(struct game_container *gc) {
 
 void update_play_scene(struct game_container *gc) {
     struct data *const pd = (struct data *)gc->scene.data;
-    if (!snake_collided(&pd->snake))
+
+    if (!snake_collided(&pd->snake)) {
         snake_update(&pd->snake, pd->tile_dimension);
+        if (!snake_collided(&pd->snake)) {
+            const SDL_Point head_tile = snake_head_tile(&pd->snake);
+            const SDL_Point apple_tile = apple_get_tile(&pd->apple);
+            if (head_tile.x == apple_tile.x && head_tile.y == apple_tile.y) {
+                SDL_Log("Snake ate apple");
+                snake_grow(&pd->snake);
+                apple_set_tile(&pd->apple, generate_next_apple_tile());
+            }
+        }
+    }
 }
 
 void draw_play_scene(struct game_container *gc) {

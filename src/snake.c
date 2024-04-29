@@ -23,10 +23,12 @@ void snake_load(struct snake *const s, resources const resources, SDL_Renderer *
     s->last_move_direction.y = 2;
     s->started_moving = SDL_FALSE;
     s->elapsed_move_frames = MOVE_FRAMES;
+    s->last_tail_tile.x = 0;
+    s->last_tail_tile.y = 0;
     s->collided = SDL_FALSE;
 }
 
-void snake_update(struct snake *s, const int tile_dimension) {
+void snake_update(struct snake *const s, const int tile_dimension) {
     // Don't start moving until D is pressed for the first time
     if (!s->started_moving && s->keyboard_state[SDL_SCANCODE_D])
         s->started_moving = SDL_TRUE;
@@ -53,6 +55,8 @@ void snake_update(struct snake *s, const int tile_dimension) {
     if (s->started_moving) {
         s->elapsed_move_frames++;
         if (s->elapsed_move_frames >= MOVE_FRAMES) {
+            s->last_tail_tile.x = s->body_tiles[s->body_tiles_length - 1].x;
+            s->last_tail_tile.y = s->body_tiles[s->body_tiles_length - 1].y;
             for (int i = s->body_tiles_length - 1; i >= 1; i--) {
                 s->body_tiles[i].x = s->body_tiles[i - 1].x;
                 s->body_tiles[i].y = s->body_tiles[i - 1].y;
@@ -73,7 +77,7 @@ void snake_update(struct snake *s, const int tile_dimension) {
     }
 }
 
-void snake_draw(struct snake *s, SDL_Renderer *const renderer, const int tile_size) {
+void snake_draw(struct snake *const s, SDL_Renderer *const renderer, const int tile_size) {
     for (int i = 0; i < s->body_tiles_length; i++) {
         SDL_SetRenderDrawColor(renderer, 128, 93, 228, SDL_ALPHA_OPAQUE);
         SDL_Rect body_rect = {s->body_tiles[i].x * tile_size, s->body_tiles[i].y * tile_size, tile_size, tile_size};
@@ -81,10 +85,25 @@ void snake_draw(struct snake *s, SDL_Renderer *const renderer, const int tile_si
     }
 }
 
-void snake_unload(struct snake *s, resources resources) {
+void snake_unload(struct snake *const s, resources const resources) {
     free(s->body_tiles);
 }
 
-SDL_bool snake_collided(struct snake *s) {
+SDL_bool snake_collided(struct snake *const s) {
     return s->collided;
+}
+
+SDL_Point snake_head_tile(struct snake *const s) {
+    return s->body_tiles[0];
+}
+
+SDL_Point *snake_all_tiles(struct snake *const s, int *const length) {
+    *length = s->body_tiles_length;
+    return s->body_tiles;
+}
+
+void snake_grow(struct snake *const s) {
+    s->body_tiles[s->body_tiles_length].x = s->last_tail_tile.x;
+    s->body_tiles[s->body_tiles_length].y = s->last_tail_tile.y;
+    s->body_tiles_length++;
 }
