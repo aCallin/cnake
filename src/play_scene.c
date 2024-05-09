@@ -1,5 +1,6 @@
 #include "game_scene_common.h"
 
+#include <string.h>
 #include "background.h"
 #include "snake.h"
 #include "apple.h"
@@ -15,8 +16,49 @@ struct data {
     struct apple apple;
 };
 
-static SDL_Point generate_next_apple_tile() {
-    SDL_Point tile = {0, 0};
+static SDL_Point generate_next_apple_tile(const int tile_dimension, struct snake *const snake) {
+    const int num_tiles = tile_dimension * tile_dimension;
+
+    struct possible_tile_entry {
+        SDL_Point tile;
+        SDL_bool marked;
+    };
+
+    // Create set of possible tiles for the apple
+    struct possible_tile_entry *const possible_tile_entries = malloc(num_tiles * sizeof(struct possible_tile_entry));
+    for (int i = 0; i < num_tiles; i++) {
+        possible_tile_entries[i].tile.x = i % tile_dimension;
+        possible_tile_entries[i].tile.y = i / tile_dimension;
+        possible_tile_entries[i].marked = SDL_FALSE;
+    }
+    int possible_tile_entries_length = num_tiles;
+
+    // Mark tiles that are occupied by the snake
+    int occupied_tiles_length;
+    const SDL_Point *const occupied_tiles = snake_all_tiles(snake, &occupied_tiles_length);
+    for (int i = 0; i < occupied_tiles_length; i++) {
+        const int occupied_tile_index = occupied_tiles[i].x + occupied_tiles[i].y * tile_dimension;
+        possible_tile_entries[occupied_tile_index].marked = SDL_TRUE;
+    }
+
+    // "Remove" the tiles that are marked
+    int copy_behind_offset = 0;
+    for (int i = 0; i < num_tiles; i++) {
+        if (possible_tile_entries[i].marked == SDL_TRUE) {
+            possible_tile_entries_length--;
+            copy_behind_offset++;
+        } else if (copy_behind_offset != 0) {
+            possible_tile_entries[i - copy_behind_offset].tile = possible_tile_entries[i].tile;
+            possible_tile_entries[i - copy_behind_offset].marked = SDL_FALSE;
+        }
+    }
+
+    // Choose a random tile from what remains of possible tiles
+    const int random_index = rand() % possible_tile_entries_length;
+    SDL_Point tile;
+    tile.x = possible_tile_entries[random_index].tile.x;
+    tile.y = possible_tile_entries[random_index].tile.y;
+    free(possible_tile_entries);
     return tile;
 }
 
@@ -45,7 +87,8 @@ void update_play_scene(struct game_container *gc) {
             if (head_tile.x == apple_tile.x && head_tile.y == apple_tile.y) {
                 SDL_Log("Snake ate apple");
                 snake_grow(&pd->snake);
-                apple_set_tile(&pd->apple, generate_next_apple_tile());
+                SDL_Point next_apple_tile = generate_next_apple_tile(pd->tile_dimension, &pd->snake);
+                apple_set_tile(&pd->apple, next_apple_tile);
             }
         }
     }
